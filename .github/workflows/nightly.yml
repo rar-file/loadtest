@@ -1,0 +1,68 @@
+name: Nightly Tests
+
+on:
+  schedule:
+    - cron: "0 0 * * *"
+  workflow_dispatch:
+
+jobs:
+  test-edge:
+    name: Test with Latest Dependencies
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13-dev"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies (latest)
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev,all]" --upgrade --force-reinstall
+
+      - name: Run tests
+        run: pytest -v --tb=short
+
+  performance-regression:
+    name: Performance Regression Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+          pip install pytest-benchmark
+
+      - name: Run benchmarks (current)
+        run: |
+          python -m pytest benchmarks/ --benchmark-only --benchmark-json=benchmark-current.json
+
+      - name: Checkout main branch
+        run: |
+          git stash
+          git checkout main
+
+      - name: Run benchmarks (main)
+        run: |
+          python -m pip install -e ".[dev]"
+          python -m pytest benchmarks/ --benchmark-only --benchmark-json=benchmark-main.json
+
+      - name: Compare benchmarks
+        run: |
+          pip install py.test-benchmark-compare
+          python -m pytest_benchmark_compare benchmark-main.json benchmark-current.json
