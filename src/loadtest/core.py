@@ -285,7 +285,9 @@ class LoadTest:
         """
         if format == "html":
             from loadtest.reports.html import HTMLReportGenerator
-            generator = HTMLReportGenerator(**kwargs)
+            # Use test name as default title, allow override via kwargs
+            title = kwargs.pop("title", self.config.name)
+            generator = HTMLReportGenerator(title=title, **kwargs)
         elif format == "console":
             return self._generate_console_report()
         else:

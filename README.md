@@ -1,267 +1,312 @@
 # LoadTest
 
 [![CI](https://github.com/rar-file/loadtest/actions/workflows/ci.yml/badge.svg)](https://github.com/rar-file/loadtest/actions/workflows/ci.yml)
-[![PyPI version](https://badge.fury.io/py/loadtest.svg)](https://badge.fury.io/py/loadtest)
 [![Python versions](https://img.shields.io/pypi/pyversions/loadtest.svg)](https://pypi.org/project/loadtest/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-> Enterprise-grade synthetic traffic generator for load testing
+> 🚀 Modern, async-first load testing framework for Python
 
-LoadTest is a modern load testing framework designed for realistic traffic simulation. It supports multiple protocols, user behavior modeling, and distributed load generation.
+LoadTest is a synthetic traffic generator designed for realistic load testing of web applications. It features an intuitive API, multiple traffic patterns, and comprehensive reporting.
 
 ## Features
 
-### Protocol Support
-- HTTP/1.1, HTTP/2
-- WebSocket
-- GraphQL
-- gRPC (coming soon)
-- HTTP/3 (coming soon)
+- **🎯 Simple API** - Intuitive builder pattern for creating tests
+- **⚡ Async-First** - Built on asyncio for high concurrency
+- **📊 Rich Reports** - HTML reports with interactive charts
+- **🔄 Multiple Patterns** - Constant, ramp, spike, burst, and custom patterns
+- **🌐 HTTP/2 Support** - Full HTTP/1.1 and HTTP/2 via httpx
+- **🔌 WebSocket Ready** - Built-in WebSocket scenario support
+- **🧪 Realistic Data** - Integration with Phoney for realistic test data
 
-### Traffic Patterns
-- **Steady**: Constant load
-- **Ramp**: Gradual increase
-- **Spike**: Sudden burst
-- **Burst**: Repeated spikes
-- **Wave**: Sinusoidal pattern
-- **Step**: Step-wise increase
+## Installation
 
-### User Simulation
-- Realistic think times
-- Session-based workflows
-- Cookie/state management
-- Concurrent user scenarios
+```bash
+# Basic installation
+pip install loadtest
 
-### Metrics & Reporting
-- Real-time dashboard
-- Prometheus export
-- Statistical analysis
-- A/B test comparisons
+# With web automation support (Playwright)
+pip install "loadtest[web]"
+
+# Development installation
+pip install "loadtest[dev]"
+```
 
 ## Quick Start
 
-```bash
-pip install loadtest
-```
-
-Create a test scenario:
+Create a test file (`test.py`):
 
 ```python
-# test_scenario.py
-from loadtest import TestBuilder, Scenario
+from loadtest import LoadTest
+from loadtest.generators.constant import ConstantRateGenerator
+from loadtest.scenarios.http import HTTPScenario
 
-scenario = (
-    TestBuilder()
-    .target("https://api.example.com")
-    .pattern("ramp", target_rps=1000, duration=300)
-    .scenario("login_flow")
-    .users(concurrent=100)
-    .build()
-)
-
-scenario.run()
+async def create_test():
+    # Define an HTTP scenario
+    scenario = HTTPScenario(
+        name="Get Users",
+        method="GET",
+        url="https://httpbin.org/get",
+    )
+    
+    # Build and return the test
+    return (
+        LoadTest(name="API Test", duration=30)
+        .add_scenario(scenario, weight=1)
+        .set_pattern(ConstantRateGenerator(rate=10))  # 10 req/s
+    )
 ```
 
 Run it:
 
 ```bash
-loadtest run test_scenario.py
+loadtest run test.py
 ```
 
-## Example Scenarios
+Generate an HTML report:
 
-### E-commerce Checkout
-```python
-from loadtest import HttpClient, scenario
-
-@scenario
-async def checkout_flow(client: HttpClient):
-    # Browse products
-    await client.get("/products")
-    await client.think(2, 5)  # Think 2-5 seconds
-    
-    # Add to cart
-    await client.post("/cart", json={"product_id": 123})
-    await client.think(1, 3)
-    
-    # Checkout
-    await client.post("/checkout", json={
-        "payment": "visa",
-        "shipping": "express"
-    })
+```bash
+loadtest run test.py --output report.html
 ```
 
-### API Load Test
-```python
-from loadtest import TestBuilder
+## Examples
 
-test = (
-    TestBuilder()
-    .target("https://api.example.com")
-    .headers({"Authorization": "Bearer ${TOKEN}"})
-    .pattern("spike", 
-        target_rps=5000,
-        duration=60,
-        spike_duration=10
+### HTTP Load Test with POST Data
+
+```python
+from loadtest import LoadTest
+from loadtest.generators.ramp import RampGenerator
+from loadtest.scenarios.http import HTTPScenario
+
+async def create_test():
+    # POST scenario with dynamic data
+    create_scenario = HTTPScenario(
+        name="Create User",
+        method="POST",
+        url="https://httpbin.org/post",
+        data_factory=lambda: {
+            "name": "John Doe",
+            "email": "john@example.com",
+        },
     )
-    .endpoint("GET /users")
-    .endpoint("POST /orders", weight=0.3)
-    .endpoint("GET /products", weight=0.7)
-    .build()
-)
-
-test.run()
+    
+    # Ramp up from 5 to 50 req/s over 60 seconds
+    return (
+        LoadTest(name="Ramp Test", duration=60)
+        .add_scenario(create_scenario)
+        .set_pattern(RampGenerator(start_rate=5, end_rate=50, duration=60))
+    )
 ```
 
-### WebSocket Test
-```python
-from loadtest.protocols import WebSocketHandler
+### Authenticated API Testing
 
-@scenario
-async def websocket_chat(client):
-    ws = await client.websocket("wss://chat.example.com")
+```python
+from loadtest.scenarios.http import AuthenticatedHTTPScenario
+
+async def create_test():
+    scenario = AuthenticatedHTTPScenario(
+        name="API Request",
+        method="GET",
+        url="https://api.example.com/data",
+        auth_token="your-api-token",
+        auth_prefix="Bearer ",
+    )
     
-    await ws.send({"type": "join", "room": "general"})
+    return LoadTest(name="Auth Test", duration=60).add_scenario(scenario)
+```
+
+### Using Advanced Traffic Patterns
+
+```python
+from loadtest.patterns import BurstGenerator, SteadyStateGenerator, StepLadderGenerator
+
+async def create_test():
+    from loadtest import LoadTest
+    from loadtest.scenarios.http import HTTPScenario
     
-    async for message in ws.listen(duration=30):
-        if message["type"] == "message":
-            await ws.think(1, 5)
-            await ws.send({
-                "type": "reply",
-                "text": "Thanks!"
-            })
+    scenario = HTTPScenario(method="GET", url="https://api.example.com/health")
+    
+    # Burst pattern: sudden spike after delay
+    pattern = BurstGenerator(
+        initial_rate=10,
+        burst_rate=1000,
+        burst_duration=30,
+        delay=60,
+    )
+    
+    # Or steady state with jitter
+    # pattern = SteadyStateGenerator(target_rate=100, jitter=0.1)
+    
+    # Or step ladder for capacity testing
+    # pattern = StepLadderGenerator(
+    #     start_rate=10, end_rate=100, steps=5, step_duration=60
+    # )
+    
+    return LoadTest(name="Pattern Test", duration=120).add_scenario(scenario).set_pattern(pattern)
 ```
 
 ## CLI Usage
 
 ```bash
+# Show version
+loadtest version
+
+# Show available components
+loadtest info
+
+# Show quick start guide
+loadtest quickstart
+
 # Run a test
-loadtest run scenario.py
+loadtest run test.py
 
-# With custom config
-loadtest run scenario.py --config config.yaml
+# Run with custom duration
+loadtest run test.py --duration 120
 
-# Distributed mode
-loadtest master --port 5557
-loadtest worker --master localhost:5557
-
-# View results
-loadtest report results.json --format html
+# Generate HTML report
+loadtest run test.py --output report.html
 ```
 
-## Configuration
-
-```yaml
-# config.yaml
-target:
-  base_url: https://api.example.com
-  timeout: 30
-
-pattern:
-  type: ramp
-  target_rps: 1000
-  duration: 300
-  warmup: 30
-
-users:
-  concurrent: 100
-  ramp_up: 60
-
-reporting:
-  format: json
-  output: results.json
-  prometheus:
-    enabled: true
-    port: 9090
-```
-
-## Real-Time Dashboard
+## Docker Usage
 
 ```bash
-# Start test with dashboard
-loadtest run scenario.py --dashboard
+# Build the image
+docker build -t loadtest .
+
+# Run a test
+docker run -v $(pwd)/examples:/app/tests loadtest run /app/tests/quickstart.py
+
+# Using docker-compose
+docker-compose up loadtest
 ```
 
-Access dashboard at `http://localhost:8080`
+## Project Structure
 
-Features:
-- Live RPS/RPM metrics
-- Response time percentiles
-- Error rate tracking
-- Active user count
-
-## Distributed Load Testing
-
-```bash
-# Start master
-loadtest master --bind 0.0.0.0:5557
-
-# Start workers (on multiple machines)
-loadtest worker --master 192.168.1.100:5557
-loadtest worker --master 192.168.1.100:5557
-
-# Run distributed test
-loadtest run scenario.py --distributed
 ```
-
-## Metrics Export
-
-### Prometheus
-```yaml
-reporting:
-  prometheus:
-    enabled: true
-    port: 9090
-    path: /metrics
-```
-
-### JSON
-```python
-results = test.run()
-results.save_json("load_test_results.json")
-```
-
-## Analysis
-
-```python
-from loadtest.analysis import analyze_results
-
-results = analyze_results("results.json")
-
-print(f"99th percentile: {results.latency_p99}ms")
-print(f"Error rate: {results.error_rate}%")
-print(f"Max RPS: {results.max_rps}")
-
-# Compare runs
-comparison = results.compare_to("baseline.json")
-print(comparison.summary())
-```
-
-## Installation
-
-### Basic
-```bash
-pip install loadtest
-```
-
-### With Web Support
-```bash
-pip install "loadtest[web]"  # Includes Playwright
-```
-
-### All Features
-```bash
-pip install "loadtest[all]"
+loadtest/
+├── examples/           # Example test scenarios
+│   ├── quickstart.py   # Simplest example
+│   ├── simple_http_load.py
+│   └── api_load_test.py
+├── src/loadtest/       # Main source code
+│   ├── core.py         # LoadTest class
+│   ├── scenarios/      # Test scenarios
+│   │   ├── http.py     # HTTP scenarios
+│   │   └── websocket.py
+│   ├── generators/     # Traffic generators
+│   │   ├── constant.py
+│   │   ├── ramp.py
+│   │   └── spike.py
+│   ├── patterns.py     # New pattern system
+│   └── reports/        # Report generators
+│       └── html.py
+├── tests/              # Test suite
+├── Dockerfile
+├── docker-compose.yml
+└── pyproject.toml
 ```
 
 ## Development
 
 ```bash
-git clone https://github.com/rar-file/loadtest.git
+# Clone the repository
+git clone https://github.com/example/loadtest.git
 cd loadtest
+
+# Install in development mode
 pip install -e ".[dev]"
+
+# Run tests
 pytest
+
+# Run with coverage
+pytest --cov=src/loadtest --cov-report=html
+
+# Format code
+black src/ tests/
+ruff check src/ tests/
+
+# Type checking
+mypy src/
+```
+
+## Pre-commit Hooks
+
+```bash
+# Install pre-commit
+pip install pre-commit
+
+# Install hooks
+pre-commit install
+
+# Run manually
+pre-commit run --all-files
+```
+
+## Configuration Reference
+
+### LoadTest Parameters
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `name` | str | "Load Test" | Test name for reports |
+| `duration` | float | 60.0 | Test duration in seconds |
+| `warmup_duration` | float | 5.0 | Warmup period before recording |
+| `max_concurrent` | int | 1000 | Maximum concurrent requests |
+| `console_output` | bool | True | Show real-time console output |
+
+### Traffic Patterns
+
+| Pattern | Description | Use Case |
+|---------|-------------|----------|
+| `ConstantRateGenerator` | Steady rate | Baseline testing |
+| `RampGenerator` | Gradual increase/decrease | Finding capacity limits |
+| `SpikeGenerator` | Sudden traffic spikes | Stress testing |
+| `BurstGenerator` | Single isolated burst | Spike tolerance testing |
+| `SteadyStateGenerator` | Rate with jitter | Realistic traffic |
+| `StepLadderGenerator` | Discrete steps | Capacity planning |
+| `ChaosGenerator` | Random patterns | Resilience testing |
+
+## Troubleshooting
+
+### Import Errors
+
+If you get import errors, ensure you're using the correct import paths:
+
+```python
+# Correct
+from loadtest import LoadTest
+from loadtest.generators.constant import ConstantRateGenerator
+from loadtest.scenarios.http import HTTPScenario
+```
+
+### Tests Failing
+
+Make sure all dependencies are installed:
+
+```bash
+pip install -e ".[dev]"
+pytest -v
+```
+
+### Async Issues
+
+Remember that your `create_test()` function should be async:
+
+```python
+async def create_test():  # Note: async
+    return LoadTest(...)
 ```
 
 ## License
 
 MIT License - see [LICENSE](LICENSE) file.
+
+## Contributing
+
+Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+## Support
+
+- 📖 [Documentation](https://github.com/example/loadtest/tree/main/docs)
+- 🐛 [Issue Tracker](https://github.com/example/loadtest/issues)
+- 💬 [Discussions](https://github.com/example/loadtest/discussions)

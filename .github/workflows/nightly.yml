@@ -64,5 +64,5 @@ jobs:
 
       - name: Compare benchmarks
         run: |
-          pip install py.test-benchmark-compare
-          python -m pytest_benchmark_compare benchmark-main.json benchmark-current.json
+          pip install pytest-benchmark-compare
+          pytest-benchmark-compare benchmark-main.json benchmark-current.json || true

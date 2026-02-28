@@ -8,6 +8,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Docker support with multi-stage Dockerfile
+- Docker Compose configuration for easy deployment
+- Pre-commit hooks configuration for code quality
+- Quick start example (`examples/quickstart.py`)
+- Enhanced CLI with better error messages and help
+- `loadtest quickstart` command for getting started guide
+- `loadtest info` command showing available components
+- `.dockerignore` for efficient Docker builds
+
+### Fixed
+- Fixed HTML report to include test name in title
+- Fixed phoney library integration (changed `random_int` to standard `random.randint`)
+- Fixed HTTP response elapsed time access for mocked responses
+- Fixed AsyncMock test assertions for HTTP scenario tests
+- Fixed CI workflow caching and added additional checks
+- Fixed nightly workflow benchmark comparison command
+
+### Changed
+- Improved CLI user experience with rich formatting
+- Enhanced README with comprehensive quick start guide
+- Updated CI workflow with Docker build verification
+- Updated release workflow with better error handling
+
+## [0.1.0] - 2024-02-28
+
+### Added
 - Initial release with core load testing functionality
 - Async-first architecture for high concurrency
 - HTTP scenario support with httpx
@@ -21,11 +47,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - GitHub Actions CI/CD pipelines
 - Documentation with MkDocs
 - 24+ usage examples
-
-## [0.1.0] - 2024-02-28
-
-### Added
-- Initial release
 
 ---
 

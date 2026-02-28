@@ -1,16 +1,27 @@
-"""LoadTest - Synthetic traffic generator for load testing web applications.
+"""LoadTest - Simple, powerful load testing in 3 lines.
 
-This package provides tools for generating realistic load against web applications
-using async patterns, realistic user data from Phoney, and various traffic patterns.
+Quick Start:
+    >>> from loadtest import loadtest
+    >>> test = loadtest("https://api.example.com")
+    >>> test.run()
+
+Advanced Usage:
+    >>> test = loadtest("https://api.example.com", 
+    ...                 pattern="ramp", rps=100, duration=60)
+    >>> test.add("GET /users")
+    >>> test.add("POST /orders", weight=0.3)
+    >>> test.run()
 """
 
 from loadtest.__version__ import __author__, __email__, __license__, __version__
 from loadtest.core import LoadTest
 from loadtest.runner import TestRunner
+from loadtest.simple_api import loadtest
 
 __all__ = [
     "LoadTest",
     "TestRunner",
+    "loadtest",  # Simple API
     "__version__",
     "__author__",
     "__email__",

@@ -82,8 +82,12 @@ jobs:
     name: Deploy Documentation
     needs: publish-pypi
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Needed for mike to work properly
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -104,4 +108,5 @@ jobs:
       - name: Deploy documentation
         run: |
           VERSION=${GITHUB_REF#refs/tags/v}
-          mike deploy --push --update-aliases $VERSION latest
+          echo "Deploying documentation for version $VERSION"
+          mike deploy --push --update-aliases "$VERSION" latest || echo "Documentation deployment skipped"

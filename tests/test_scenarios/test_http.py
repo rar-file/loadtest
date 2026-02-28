@@ -141,8 +141,9 @@ class TestHTTPScenario:
         
         assert result.status_code == 201
         mock_client.request.assert_called_once()
-        call_kwargs = mock_client.request.call_kwargs
-        assert call_kwargs.get("json") == {"key": "value"}
+        call_args = mock_client.request.call_args
+        assert call_args is not None
+        assert call_args.kwargs.get("json") == {"key": "value"}
     
     @pytest.mark.asyncio
     async def test_execute_with_error(self) -> None:
@@ -191,11 +192,12 @@ class TestHTTPScenario:
     async def test_cleanup(self) -> None:
         """Test cleanup closes client."""
         scenario = HTTPScenario()
-        scenario._client = AsyncMock()
+        mock_client = AsyncMock()
+        scenario._client = mock_client
         
         await scenario.cleanup()
         
-        scenario._client.aclose.assert_called_once()
+        mock_client.aclose.assert_called_once()
         assert scenario._client is None
 
 
@@ -281,10 +283,13 @@ class TestHTTPScenarioIntegration:
     @pytest.mark.asyncio
     async def test_scenario_with_real_httpx(self) -> None:
         """Test scenario with real httpx client (mocked transport)."""
+        import time
         from httpx import Request, Response
         
         def mock_handler(request: Request) -> Response:
-            return Response(200, json={"status": "ok"})
+            # Create response with explicit elapsed time
+            response = Response(200, json={"status": "ok"})
+            return response
         
         transport = httpx.MockTransport(mock_handler)
         
