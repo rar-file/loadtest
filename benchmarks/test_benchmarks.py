@@ -93,15 +93,14 @@ class TestMetricsBenchmarks:
         """Benchmark metrics recording."""
         from loadtest.metrics.collector import MetricsCollector
 
-        metrics = MetricsCollector()
-
         def record_metrics():
+            metrics = MetricsCollector()
             for i in range(1000):
                 metrics.record("response_time", 0.1 + i * 0.001)
+            return metrics.get_statistics()["custom_metrics"]["response_time"]["count"]
 
-        benchmark(record_metrics)
-        stats = metrics.get_statistics()
-        assert stats["custom_metrics"]["response_time"]["count"] == 1000
+        count = benchmark(record_metrics)
+        assert count == 1000
 
     def test_statistics_calculation(self, benchmark):
         """Benchmark statistics calculation."""
