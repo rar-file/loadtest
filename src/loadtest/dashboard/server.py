@@ -7,6 +7,7 @@ with real-time updates via WebSocket.
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import json
 import time
 from dataclasses import dataclass, field
@@ -235,10 +236,8 @@ class WebSocketDashboard:
         self._clients -= disconnected
         for ws in disconnected:
             for callback in self._on_client_disconnect:
-                try:
+                with contextlib.suppress(Exception):
                     callback(ws)
-                except Exception:
-                    pass
 
     async def _metrics_updater(self) -> None:
         """Background task to periodically update metrics."""
@@ -291,10 +290,8 @@ class WebSocketDashboard:
 
             # Notify callbacks
             for callback in self._on_client_connect:
-                try:
+                with contextlib.suppress(Exception):
                     callback(ws)
-                except Exception:
-                    pass
 
             # Send initial data
             history = await self.buffer.get_recent(60)
@@ -321,10 +318,8 @@ class WebSocketDashboard:
             self._clients.discard(ws)
 
             for callback in self._on_client_disconnect:
-                try:
+                with contextlib.suppress(Exception):
                     callback(ws)
-                except Exception:
-                    pass
 
             return ws
 

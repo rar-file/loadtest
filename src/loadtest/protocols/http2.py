@@ -7,6 +7,7 @@ connection management.
 
 from __future__ import annotations
 
+import contextlib
 import time
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
@@ -281,10 +282,8 @@ class HTTP2Connection(Connection):
             # Parse JSON if applicable
             json_data = None
             if "application/json" in response.headers.get("content-type", ""):
-                try:
+                with contextlib.suppress(Exception):
                     json_data = response.json()
-                except Exception:
-                    pass
 
             return HTTP2Response(
                 status_code=response.status_code,

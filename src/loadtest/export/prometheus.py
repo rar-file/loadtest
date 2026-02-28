@@ -47,7 +47,7 @@ class PrometheusMetric:
         Replaces invalid characters with underscores.
         """
         sanitized = []
-        for i, char in enumerate(name):
+        for _i, char in enumerate(name):
             if char.isalnum() or char == "_" or char == ":":
                 sanitized.append(char)
             else:
@@ -104,6 +104,13 @@ class Counter(PrometheusMetric):
         description: str,
         labels: dict[str, str] | None = None,
     ):
+        """Initialize counter metric.
+
+        Args:
+            name: Metric name.
+            description: Metric description.
+            labels: Optional label dictionary.
+        """
         super().__init__(name, description, "counter", labels)
 
     def inc(self, labels: dict[str, str] | None = None, value: float = 1) -> None:
@@ -145,6 +152,13 @@ class Gauge(PrometheusMetric):
         description: str,
         labels: dict[str, str] | None = None,
     ):
+        """Initialize gauge metric.
+
+        Args:
+            name: Metric name.
+            description: Metric description.
+            labels: Optional label dictionary.
+        """
         super().__init__(name, description, "gauge", labels)
 
     def set(self, value: float, labels: dict[str, str] | None = None) -> None:
@@ -213,6 +227,14 @@ class Histogram(PrometheusMetric):
         labels: dict[str, str] | None = None,
         buckets: list[float] | None = None,
     ):
+        """Initialize histogram metric.
+
+        Args:
+            name: Metric name.
+            description: Metric description.
+            labels: Optional label dictionary.
+            buckets: Optional custom bucket boundaries.
+        """
         super().__init__(name, description, "histogram", labels)
         self.buckets = sorted(buckets or self.DEFAULT_BUCKETS)
         if self.buckets[-1] != float("inf"):
@@ -292,6 +314,16 @@ class Summary(PrometheusMetric):
         max_age: float = 600,  # 10 minutes
         age_buckets: int = 5,
     ):
+        """Initialize summary metric.
+
+        Args:
+            name: Metric name.
+            description: Metric description.
+            labels: Optional label dictionary.
+            quantiles: Quantiles to calculate.
+            max_age: Maximum age of observations in seconds.
+            age_buckets: Number of age buckets.
+        """
         super().__init__(name, description, "summary", labels)
         self.quantiles = quantiles or self.DEFAULT_QUANTILES
         self.max_age = max_age

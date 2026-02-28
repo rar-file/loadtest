@@ -7,7 +7,7 @@ import asyncio
 from abc import ABC, abstractmethod
 from collections.abc import AsyncIterator
 from dataclasses import dataclass
-from typing import Dict, Optional
+from typing import Optional
 
 
 @dataclass
@@ -16,9 +16,9 @@ class Request:
 
     method: str
     url: str
-    headers: Dict[str, str]
+    headers: dict[str, str]
     body: Optional[bytes] = None
-    metadata: Optional[Dict] = None
+    metadata: Optional[dict] = None
 
 
 @dataclass
@@ -26,16 +26,21 @@ class Response:
     """Generic response object."""
 
     status_code: int
-    headers: Dict[str, str]
+    headers: dict[str, str]
     body: bytes
     latency_ms: float
-    metadata: Optional[Dict] = None
+    metadata: Optional[dict] = None
 
 
 class ProtocolHandler(ABC):
     """Abstract base for protocol handlers."""
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: Optional[dict] = None):
+        """Initialize protocol handler.
+
+        Args:
+            config: Optional configuration dictionary.
+        """
         self.config = config or {}
         self._connected = False
 
@@ -60,17 +65,24 @@ class ProtocolHandler(ABC):
         pass
 
     async def __aenter__(self):
+        """Async context manager entry."""
         await self.connect()
         return self
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
+        """Async context manager exit."""
         await self.disconnect()
 
 
 class HTTPHandler(ProtocolHandler):
     """HTTP/1.1 and HTTP/2 handler using httpx."""
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: Optional[dict] = None):
+        """Initialize HTTP handler.
+
+        Args:
+            config: Optional configuration dictionary.
+        """
         super().__init__(config)
         self._client = None
         self._http2 = config.get("http2", True) if config else True
@@ -148,7 +160,12 @@ class HTTPHandler(ProtocolHandler):
 class WebSocketHandler(ProtocolHandler):
     """WebSocket handler."""
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: Optional[dict] = None):
+        """Initialize WebSocket handler.
+
+        Args:
+            config: Optional configuration dictionary.
+        """
         super().__init__(config)
         self._ws = None
 
@@ -164,8 +181,8 @@ class WebSocketHandler(ProtocolHandler):
         """Send WebSocket message and get response."""
         try:
             import websockets
-        except ImportError:
-            raise ImportError("websockets package required: pip install websockets")
+        except ImportError as err:
+            raise ImportError("websockets package required: pip install websockets") from err
 
         import time
 
@@ -193,8 +210,8 @@ class WebSocketHandler(ProtocolHandler):
         """Stream WebSocket messages."""
         try:
             import websockets
-        except ImportError:
-            raise ImportError("websockets package required")
+        except ImportError as err:
+            raise ImportError("websockets package required") from err
 
         async with websockets.connect(req.url, extra_headers=req.headers) as ws:
             if req.body:
@@ -220,11 +237,16 @@ class WebSocketHandler(ProtocolHandler):
 class GraphQLHandler(HTTPHandler):
     """GraphQL handler (uses HTTP underneath)."""
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: Optional[dict] = None):
+        """Initialize GraphQL handler.
+
+        Args:
+            config: Optional configuration dictionary.
+        """
         super().__init__(config)
         self._endpoint = config.get("endpoint", "") if config else ""
 
-    async def graphql_query(self, query: str, variables: Optional[Dict] = None) -> Response:
+    async def graphql_query(self, query: str, variables: Optional[dict] = None) -> Response:
         """Execute GraphQL query."""
         import json
 
@@ -242,7 +264,7 @@ class GraphQLHandler(HTTPHandler):
         return await self.request(req)
 
 
-def create_handler(protocol: str, config: Optional[Dict] = None) -> ProtocolHandler:
+def create_handler(protocol: str, config: Optional[dict] = None) -> ProtocolHandler:
     """Factory function to create protocol handlers."""
     handlers = {
         "http": HTTPHandler,

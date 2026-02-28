@@ -137,9 +137,12 @@ async def run_test(
             test.config.duration = duration
 
         # Run the test
-        print_info(
-            f"Starting test: {getattr(test, 'config', {}).get('name', 'Load Test') if hasattr(test, 'config') else 'Load Test'}"
+        test_name = (
+            getattr(test, "config", {}).get("name", "Load Test")
+            if hasattr(test, "config")
+            else "Load Test"
         )
+        print_info(f"Starting test: {test_name}")
 
         from loadtest.core import LoadTest
 

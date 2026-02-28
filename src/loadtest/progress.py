@@ -6,6 +6,7 @@ Provides real-time progress bars, live metrics, and beautiful console output.
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import time
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Callable
@@ -111,10 +112,7 @@ class ProgressTracker:
 
     def _get_live_stats(self) -> LiveStats:
         """Get current live statistics."""
-        if self._metrics_callback:
-            metrics = self._metrics_callback()
-        else:
-            metrics = {}
+        metrics = self._metrics_callback() if self._metrics_callback else {}
 
         elapsed = time.time() - (self.start_time or time.time())
         total = metrics.get("total_requests", 0)
@@ -151,10 +149,8 @@ class ProgressTracker:
 
             live.update(layout)
 
-            try:
+            with contextlib.suppress(asyncio.TimeoutError):
                 await asyncio.wait_for(self._stop_event.wait(), timeout=0.5)
-            except asyncio.TimeoutError:
-                pass
 
     async def run(self) -> None:
         """Run the progress tracker."""
@@ -243,6 +239,12 @@ class TestProgress:
     """Simple progress wrapper for use in core LoadTest."""
 
     def __init__(self, duration: float, test_name: str = "Load Test") -> None:
+        """Initialize test progress.
+
+        Args:
+            duration: Test duration in seconds.
+            test_name: Name of the test.
+        """
         self.duration = duration
         self.test_name = test_name
         self.tracker = ProgressTracker(duration, test_name)

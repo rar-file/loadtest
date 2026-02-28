@@ -7,6 +7,7 @@ for pattern composition, events/hooks, and smooth transitions.
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import random
 import time
 from abc import ABC, abstractmethod
@@ -133,16 +134,15 @@ class TrafficPattern(ABC):
             metadata=kwargs,
         )
         for handler in self._event_handlers.get(event_type, []):
-            try:
-                handler(event)
-            except Exception:
-                pass  # Don't let event handlers break the pattern
+            with contextlib.suppress(Exception):
+                handler(event)  # Don't let event handlers break the pattern
 
     def stop(self) -> None:
         """Stop the pattern."""
         self._running = False
 
     def __repr__(self) -> str:
+        """Return string representation of the pattern."""
         return f"{self.__class__.__name__}(name='{self.name}')"
 
 
@@ -233,6 +233,7 @@ class BurstGenerator(TrafficPattern):
             await asyncio.sleep(0.1)
 
     def __repr__(self) -> str:
+        """Return string representation of the generator."""
         return (
             f"BurstGenerator("
             f"initial_rate={self.initial_rate}, "
@@ -306,6 +307,7 @@ class SteadyStateGenerator(TrafficPattern):
             await asyncio.sleep(0.1)
 
     def __repr__(self) -> str:
+        """Return string representation of the generator."""
         return (
             f"SteadyStateGenerator("
             f"target_rate={self.target_rate}, "
@@ -366,6 +368,7 @@ class CustomCurveGenerator(TrafficPattern):
             await asyncio.sleep(0.1)
 
     def __repr__(self) -> str:
+        """Return string representation of the generator."""
         return f"CustomCurveGenerator(duration={self.duration})"
 
 
@@ -468,6 +471,7 @@ class StepLadderGenerator(TrafficPattern):
             await asyncio.sleep(0.1)
 
     def __repr__(self) -> str:
+        """Return string representation of the generator."""
         return (
             f"StepLadderGenerator("
             f"start_rate={self.start_rate}, "
@@ -567,6 +571,7 @@ class ChaosGenerator(TrafficPattern):
             await asyncio.sleep(0.1)
 
     def __repr__(self) -> str:
+        """Return string representation of the generator."""
         return (
             f"ChaosGenerator("
             f"min_rate={self.min_rate}, "
@@ -673,14 +678,20 @@ class CompositePattern(TrafficPattern):
             pattern.stop()
 
     def __repr__(self) -> str:
+        """Return string representation of the pattern."""
         return f"CompositePattern(patterns={len(self.patterns)}, mode='{self.mode}')"
 
 
 # Legacy compatibility - re-export existing generators
-from loadtest.generators.constant import ConstantRateGenerator, VariableRateGenerator
-from loadtest.generators.ramp import RampGenerator
-from loadtest.generators.spike import BurstGenerator as LegacyBurstGenerator
-from loadtest.generators.spike import SpikeGenerator
+from loadtest.generators.constant import (  # noqa: E402
+    ConstantRateGenerator,
+    VariableRateGenerator,
+)
+from loadtest.generators.ramp import RampGenerator  # noqa: E402
+from loadtest.generators.spike import (  # noqa: E402
+    BurstGenerator as LegacyBurstGenerator,
+)
+from loadtest.generators.spike import SpikeGenerator  # noqa: E402
 
 __all__ = [
     "PatternEvent",

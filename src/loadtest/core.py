@@ -238,19 +238,19 @@ class LoadTest:
         Args:
             result: The TestResult to update with metrics.
         """
+        import contextlib
+
         if self._runner is None:
             return
 
         if self.config.console_output:
             print(f"Running test '{self.config.name}' for {self.config.duration}s...")
 
-        try:
+        with contextlib.suppress(asyncio.TimeoutError):
             await asyncio.wait_for(
                 self._runner.run(),
                 timeout=self.config.duration,
             )
-        except asyncio.TimeoutError:
-            pass
 
         # Update result with final metrics
         stats = self.metrics.get_statistics()

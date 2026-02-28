@@ -8,6 +8,7 @@ and proper lifecycle handling.
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import time
 from dataclasses import dataclass, field
 from enum import Enum
@@ -233,10 +234,8 @@ class WebSocketConnection(Connection):
         # Cancel receiver task
         if self._receiver_task and not self._receiver_task.done():
             self._receiver_task.cancel()
-            try:
+            with contextlib.suppress(asyncio.CancelledError):
                 await self._receiver_task
-            except asyncio.CancelledError:
-                pass
 
         # Close websocket
         if self._websocket:

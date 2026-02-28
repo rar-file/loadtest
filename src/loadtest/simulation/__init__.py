@@ -7,6 +7,7 @@ realistic user behaviors with state management, think times, and multi-step flow
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import random
 import time
 from abc import ABC, abstractmethod
@@ -359,6 +360,7 @@ class Session:
         }
 
     def __repr__(self) -> str:
+        """Return string representation of the session."""
         return f"Session(id={self.session_id}, state={self.state.name})"
 
 
@@ -561,10 +563,8 @@ class SessionFlow:
 
                 # Notify callbacks
                 for callback in self.on_step_complete:
-                    try:
+                    with contextlib.suppress(Exception):
                         callback(step_result)
-                    except Exception:
-                        pass
 
                 # Stop on failure if configured
                 if not step_result.success:
@@ -676,10 +676,8 @@ class SimulationEngine:
 
             # Notify callbacks
             for callback in self._on_session_complete:
-                try:
+                with contextlib.suppress(Exception):
                     callback(session, results)
-                except Exception:
-                    pass
 
             return session, results
 

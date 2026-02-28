@@ -183,6 +183,11 @@ class HTTPAction:
     """HTTP action that can be executed."""
 
     def __init__(self, config: HTTPConfig) -> None:
+        """Initialize HTTP action.
+
+        Args:
+            config: HTTP configuration.
+        """
         self.config = config
         self._extractors: list[Callable] = []
         self._validators: list[Callable] = []
@@ -205,10 +210,7 @@ class HTTPAction:
                 keys = path.replace("[", ".").replace("]", "").split(".")
                 value = data
                 for key in keys:
-                    if key.isdigit():
-                        value = value[int(key)]
-                    else:
-                        value = value[key]
+                    value = value[int(key)] if key.isdigit() else value[key]
                 session[var_name] = value
             except Exception:
                 pass
@@ -455,10 +457,7 @@ def json_path_equals(path: str, expected: Any) -> Callable[[httpx.Response], boo
             keys = path.replace("[", ".").replace("]", "").split(".")
             value = data
             for key in keys:
-                if key.isdigit():
-                    value = value[int(key)]
-                else:
-                    value = value[key]
+                value = value[int(key)] if key.isdigit() else value[key]
             return value == expected
         except Exception:
             return False
@@ -529,6 +528,11 @@ class ScenarioBuilder:
     """
 
     def __init__(self, name: str) -> None:
+        """Initialize scenario builder.
+
+        Args:
+            name: Name of the scenario.
+        """
         self.name = name
         self.steps: list[Step] = []
         self.default_think_time: Callable[[], float] | None = None
@@ -651,6 +655,16 @@ class DSLScenario:
         setup: Callable | None = None,
         teardown: Callable | None = None,
     ) -> None:
+        """Initialize DSL scenario.
+
+        Args:
+            name: Scenario name.
+            steps: List of steps in the scenario.
+            default_think_time: Default think time function.
+            use_session: Whether to use session state.
+            setup: Optional setup function.
+            teardown: Optional teardown function.
+        """
         self.name = name
         self.steps = steps
         self.default_think_time = default_think_time

@@ -108,12 +108,11 @@ class SpikeGenerator:
             elapsed = asyncio.get_event_loop().time() - self._start_time
 
             # Check if we should stop based on spike count
-            if self.spike_count is not None:
-                if self._spikes_generated >= self.spike_count:
-                    # All spikes done, continue at baseline
-                    yield self.baseline_rate
-                    await asyncio.sleep(0.1)
-                    continue
+            if self.spike_count is not None and self._spikes_generated >= self.spike_count:
+                # All spikes done, continue at baseline
+                yield self.baseline_rate
+                await asyncio.sleep(0.1)
+                continue
 
             # Determine if we're in a spike
             if self._next_spike_time is not None:

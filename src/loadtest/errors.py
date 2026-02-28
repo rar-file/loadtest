@@ -20,6 +20,12 @@ class LoadTestError(Exception):
     """Base exception with helpful suggestions."""
 
     def __init__(self, message: str, suggestion: str | None = None) -> None:
+        """Initialize error with message and suggestion.
+
+        Args:
+            message: Error message.
+            suggestion: Optional suggestion to help fix the error.
+        """
         super().__init__(message)
         self.message = message
         self.suggestion = suggestion
@@ -66,68 +72,135 @@ ERROR_SUGGESTIONS = {
     # URL errors
     r"invalid url|malformed url|no scheme": {
         "message": "Invalid URL format",
-        "suggestion": "Make sure your URL includes the scheme (http:// or https://).\nExample: https://api.example.com instead of api.example.com",
+        "suggestion": (
+            "Make sure your URL includes the scheme (http:// or https://).\n"
+            "Example: https://api.example.com instead of api.example.com"
+        ),
     },
     # Connection errors
     r"connection refused|errno 111": {
         "message": "Connection refused",
-        "suggestion": "The server rejected the connection. Check that:\n• The server is running\n• The port is correct\n• Firewall rules allow the connection",
+        "suggestion": (
+            "The server rejected the connection. Check that:\n"
+            "• The server is running\n"
+            "• The port is correct\n"
+            "• Firewall rules allow the connection"
+        ),
     },
     r"name or service not known|getaddrinfo failed|nodename nor servname": {
         "message": "Could not resolve hostname",
-        "suggestion": "The domain name could not be resolved. Check that:\n• The URL is spelled correctly\n• You have internet connectivity\n• DNS is working (try: nslookup \u003cdomain\u003e)",
+        "suggestion": (
+            "The domain name could not be resolved. Check that:\n"
+            "• The URL is spelled correctly\n"
+            "• You have internet connectivity\n"
+            "• DNS is working (try: nslookup <domain>)"
+        ),
     },
     r"timeout|timed out": {
         "message": "Request timed out",
-        "suggestion": "The server took too long to respond. Try:\n• Increasing the timeout: test.add(..., timeout=60)\n• Checking if the server is overloaded\n• Verifying the endpoint exists",
+        "suggestion": (
+            "The server took too long to respond. Try:\n"
+            "• Increasing the timeout: test.add(..., timeout=60)\n"
+            "• Checking if the server is overloaded\n"
+            "• Verifying the endpoint exists"
+        ),
     },
     # SSL/TLS errors
     r"ssl|certificate|tls|verify": {
         "message": "SSL/TLS error",
-        "suggestion": "There's a certificate issue. Options:\n• For self-signed certs in testing: verify=False (not for production!)\n• Check system time is correct\n• Update CA certificates: pip install --upgrade certifi",
+        "suggestion": (
+            "There's a certificate issue. Options:\n"
+            "• For self-signed certs in testing: verify=False (not for production!)\n"
+            "• Check system time is correct\n"
+            "• Update CA certificates: pip install --upgrade certifi"
+        ),
     },
     # HTTP errors
     r"404|not found": {
         "message": "Endpoint not found (404)",
-        "suggestion": "The endpoint doesn't exist. Check:\n• The URL path is correct\n• You're using the right HTTP method\n• The API version is correct",
+        "suggestion": (
+            "The endpoint doesn't exist. Check:\n"
+            "• The URL path is correct\n"
+            "• You're using the right HTTP method\n"
+            "• The API version is correct"
+        ),
     },
     r"401|unauthorized": {
         "message": "Authentication required (401)",
-        "suggestion": "You need to authenticate. Try:\n• test.auth('your-token')\n• test.headers({'Authorization': 'Bearer TOKEN'})\n• test.headers({'X-API-Key': 'your-key'})",
+        "suggestion": (
+            "You need to authenticate. Try:\n"
+            "• test.auth('your-token')\n"
+            "• test.headers({'Authorization': 'Bearer TOKEN'})\n"
+            "• test.headers({'X-API-Key': 'your-key'})"
+        ),
     },
     r"403|forbidden": {
         "message": "Access forbidden (403)",
-        "suggestion": "You don't have permission. Check:\n• Your authentication token is valid\n• Your account has the required permissions\n• IP allowlists/firewall rules",
+        "suggestion": (
+            "You don't have permission. Check:\n"
+            "• Your authentication token is valid\n"
+            "• Your account has the required permissions\n"
+            "• IP allowlists/firewall rules"
+        ),
     },
     r"429|too many requests": {
         "message": "Rate limited (429)",
-        "suggestion": "The server is rate-limiting you. Try:\n• Reducing RPS: loadtest(..., rps=5)\n• Adding delays between requests\n• Checking API rate limit documentation",
+        "suggestion": (
+            "The server is rate-limiting you. Try:\n"
+            "• Reducing RPS: loadtest(..., rps=5)\n"
+            "• Adding delays between requests\n"
+            "• Checking API rate limit documentation"
+        ),
     },
     r"500|internal server error": {
         "message": "Server error (500)",
-        "suggestion": "The server encountered an error. This is usually a bug in the server.\nCheck server logs or try:\n• Different request parameters\n• Different endpoint\n• Contacting the API provider",
+        "suggestion": (
+            "The server encountered an error. This is usually a bug in the server.\n"
+            "Check server logs or try:\n"
+            "• Different request parameters\n"
+            "• Different endpoint\n"
+            "• Contacting the API provider"
+        ),
     },
     r"502|bad gateway": {
         "message": "Bad gateway (502)",
-        "suggestion": "The proxy/gateway received an invalid response.\nThe upstream server may be down or overloaded.",
+        "suggestion": (
+            "The proxy/gateway received an invalid response.\n"
+            "The upstream server may be down or overloaded."
+        ),
     },
     r"503|service unavailable": {
         "message": "Service unavailable (503)",
-        "suggestion": "The server is temporarily unavailable.\nIt may be overloaded or down for maintenance.",
+        "suggestion": (
+            "The server is temporarily unavailable.\n"
+            "It may be overloaded or down for maintenance."
+        ),
     },
     # Configuration errors
     r"no scenarios|empty scenarios": {
         "message": "No test scenarios configured",
-        "suggestion": "Add at least one endpoint:\n• test.add('GET /users')\n• test.add('POST /orders', json={'item': 'widget'})",
+        "suggestion": (
+            "Add at least one endpoint:\n"
+            "• test.add('GET /users')\n"
+            "• test.add('POST /orders', json={'item': 'widget'})"
+        ),
     },
     r"no pattern|pattern not set": {
         "message": "No traffic pattern set",
-        "suggestion": "Set a pattern when creating the test:\n• loadtest(..., pattern='constant')\n• loadtest(..., pattern='ramp', rps=10, target_rps=100)",
+        "suggestion": (
+            "Set a pattern when creating the test:\n"
+            "• loadtest(..., pattern='constant')\n"
+            "• loadtest(..., pattern='ramp', rps=10, target_rps=100)"
+        ),
     },
     # Import errors
     r"no module named|cannot import|import error": {
         "message": "Import error",
-        "suggestion": "Make sure loadtest is installed:\n• pip install loadtest\n• pip install -e . (if developing)",
+        "suggestion": (
+            "Make sure loadtest is installed:\n"
+            "• pip install loadtest\n"
+            "• pip install -e . (if developing)"
+        ),
     },
 }
 

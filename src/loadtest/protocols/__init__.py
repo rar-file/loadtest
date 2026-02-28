@@ -20,7 +20,7 @@ from enum import Enum, auto
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from loadtest.metrics.collector import MetricsCollector
+    from loadtest.metrics.collector import MetricsCollector as MetricsCollector
 
 
 class ProtocolType(Enum):
