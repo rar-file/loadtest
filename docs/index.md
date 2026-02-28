@@ -1,12 +1,12 @@
 # LoadTest
 
-[![CI](https://github.com/example/loadtest/actions/workflows/ci.yml/badge.svg)](https://github.com/example/loadtest/actions/workflows/ci.yml)
-[![codecov](https://codecov.io/gh/example/loadtest/branch/main/graph/badge.svg)](https://codecov.io/gh/example/loadtest)
-[![PyPI](https://img.shields.io/pypi/v/loadtest.svg)](https://pypi.org/project/loadtest/)
-[![Python Version](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://www.python.org/)
+[![CI](https://img.shields.io/github/actions/workflow/status/rar-file/loadtest/ci.yml?branch=main&label=CI&logo=github)](https://github.com/rar-file/loadtest/actions)
+[![codecov](https://codecov.io/gh/rar-file/loadtest/branch/main/graph/badge.svg)](https://codecov.io/gh/rar-file/loadtest)
+[![PyPI](https://img.shields.io/pypi/v/loadtest.svg?logo=pypi&logoColor=white)](https://pypi.org/project/loadtest/)
+[![Python Version](https://img.shields.io/badge/python-3.9%2B-blue.svg?logo=python&logoColor=white)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![Documentation](https://img.shields.io/badge/docs-mkdocs-blue.svg)](https://loadtest.readthedocs.io)
+[![Documentation](https://img.shields.io/badge/docs-mkdocs-blue.svg)](https://github.com/rar-file/loadtest)
 
 **A modern, async-first synthetic traffic generator for load testing web applications.**
 
@@ -105,8 +105,8 @@ graph TB
 
 ## Contributing
 
-We welcome contributions! See [CONTRIBUTING.md](https://github.com/example/loadtest/blob/main/CONTRIBUTING.md) for guidelines.
+We welcome contributions! See [CONTRIBUTING.md](https://github.com/rar-file/loadtest/blob/main/CONTRIBUTING.md) for guidelines.
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](https://github.com/example/loadtest/blob/main/LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](https://github.com/rar-file/loadtest/blob/main/LICENSE) file for details.

@@ -8,45 +8,28 @@ services:
     image: loadtest:latest
     container_name: loadtest
     volumes:
-      - ./tests:/app/tests:ro
-      - ./reports:/app/reports
       - ./examples:/app/examples:ro
-    command: ["run", "/app/examples/simple_http_load.py"]
+      - ./reports:/app/reports
     environment:
       - PYTHONUNBUFFERED=1
+      - TERM=xterm-256color
+    # Override default command with your test file
+    # command: ["run", "/app/examples/simple_http_load.py"]
+    # Or with HTML report output
+    # command: ["run", "/app/examples/simple_http_load.py", "--output", "/app/reports/report.html"]
     networks:
       - loadtest-network
 
-  # Optional: LoadTest Master for distributed testing
-  loadtest-master:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    image: loadtest:latest
-    container_name: loadtest-master
-    ports:
-      - "5557:5557"
-    command: ["master", "--bind", "0.0.0.0:5557"]
-    networks:
-      - loadtest-network
+  # Watchtower for auto-updating the image (optional)
+  watchtower:
+    image: containrrr/watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - WATCHTOWER_POLL_INTERVAL=3600
+      - WATCHTOWER_CLEANUP=true
     profiles:
-      - distributed
-
-  # Optional: LoadTest Worker for distributed testing
-  loadtest-worker:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    image: loadtest:latest
-    depends_on:
-      - loadtest-master
-    command: ["worker", "--master", "loadtest-master:5557"]
-    networks:
-      - loadtest-network
-    profiles:
-      - distributed
-    deploy:
-      replicas: 2
+      - watchtower
 
 networks:
   loadtest-network:

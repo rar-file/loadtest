@@ -1,8 +1,11 @@
 # LoadTest
 
-[![CI](https://github.com/rar-file/loadtest/actions/workflows/ci.yml/badge.svg)](https://github.com/rar-file/loadtest/actions/workflows/ci.yml)
-[![Python versions](https://img.shields.io/pypi/pyversions/loadtest.svg)](https://pypi.org/project/loadtest/)
+[![CI](https://img.shields.io/github/actions/workflow/status/rar-file/loadtest/ci.yml?branch=main&label=CI&logo=github)](https://github.com/rar-file/loadtest/actions)
+[![Python versions](https://img.shields.io/pypi/pyversions/loadtest.svg?logo=python&logoColor=white)](https://pypi.org/project/loadtest/)
+[![PyPI version](https://img.shields.io/pypi/v/loadtest.svg?logo=pypi&logoColor=white)](https://pypi.org/project/loadtest/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 
 > 🚀 Modern, async-first load testing framework for Python
 
@@ -17,6 +20,8 @@ LoadTest is a synthetic traffic generator designed for realistic load testing of
 - **🌐 HTTP/2 Support** - Full HTTP/1.1 and HTTP/2 via httpx
 - **🔌 WebSocket Ready** - Built-in WebSocket scenario support
 - **🧪 Realistic Data** - Integration with Phoney for realistic test data
+- **🔒 Type Safe** - Full type hints and mypy compatibility
+- **📈 Real-time Dashboard** - Live monitoring via WebSocket dashboard
 
 ## Installation
 
@@ -32,6 +37,17 @@ pip install "loadtest[dev]"
 ```
 
 ## Quick Start
+
+### One-liner load test
+
+```python
+from loadtest import loadtest
+test = loadtest("https://httpbin.org", rps=10, duration=30)
+test.add("GET /get")
+test.run()
+```
+
+### Full API
 
 Create a test file (`test.py`):
 
@@ -93,7 +109,7 @@ async def create_test():
     return (
         LoadTest(name="Ramp Test", duration=60)
         .add_scenario(create_scenario)
-        .set_pattern(RampGenerator(start_rate=5, end_rate=50, duration=60))
+        .set_pattern(RampGenerator(start_rate=5, end_rate=50, ramp_duration=60))
     )
 ```
 
@@ -209,7 +225,7 @@ loadtest/
 
 ```bash
 # Clone the repository
-git clone https://github.com/example/loadtest.git
+git clone https://github.com/rar-file/loadtest.git
 cd loadtest
 
 # Install in development mode
@@ -307,6 +323,6 @@ Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for gu
 
 ## Support
 
-- 📖 [Documentation](https://github.com/example/loadtest/tree/main/docs)
-- 🐛 [Issue Tracker](https://github.com/example/loadtest/issues)
-- 💬 [Discussions](https://github.com/example/loadtest/discussions)
+- 📖 [Documentation](https://github.com/rar-file/loadtest/tree/main/docs)
+- 🐛 [Issue Tracker](https://github.com/rar-file/loadtest/issues)
+- 💬 [Discussions](https://github.com/rar-file/loadtest/discussions)

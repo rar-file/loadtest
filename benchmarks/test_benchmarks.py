@@ -24,7 +24,7 @@ class TestLoadTestBenchmarks:
                 )
                 for i in range(100)
             ]
-        
+
         scenarios = benchmark(create_scenarios)
         assert len(scenarios) == 100
 
@@ -32,13 +32,13 @@ class TestLoadTestBenchmarks:
         """Benchmark adding scenarios to test."""
         test = LoadTest(name="Benchmark")
         scenario = HTTPScenario(name="Test", method="GET", url="https://api.example.com")
-        
+
         def add_scenarios():
             t = LoadTest(name="Benchmark")
             for i in range(100):
                 t.add_scenario(scenario, weight=1)
             return t
-        
+
         result = benchmark(add_scenarios)
         assert len(result.scenarios) == 100
 
@@ -50,7 +50,7 @@ class TestGeneratorBenchmarks:
         """Benchmark constant generator creation."""
         def create_generators():
             return [ConstantRateGenerator(rate=i) for i in range(1, 1000)]
-        
+
         generators = benchmark(create_generators)
         assert len(generators) == 999
 
@@ -65,7 +65,7 @@ class TestGeneratorBenchmarks:
                 )
                 for i in range(100)
             ]
-        
+
         generators = benchmark(create_generators)
         assert len(generators) == 100
 
@@ -81,7 +81,7 @@ class TestGeneratorBenchmarks:
                 )
                 for i in range(100)
             ]
-        
+
         generators = benchmark(create_generators)
         assert len(generators) == 100
 
@@ -92,32 +92,33 @@ class TestMetricsBenchmarks:
     def test_metrics_recording(self, benchmark):
         """Benchmark metrics recording."""
         from loadtest.metrics.collector import MetricsCollector
-        
+
         metrics = MetricsCollector()
-        
+
         def record_metrics():
             for i in range(1000):
                 metrics.record("response_time", 0.1 + i * 0.001)
-        
+
         benchmark(record_metrics)
         stats = metrics.get_statistics()
-        assert stats["count"] == 1000
+        assert stats["custom_metrics"]["response_time"]["count"] == 1000
 
     def test_statistics_calculation(self, benchmark):
         """Benchmark statistics calculation."""
         from loadtest.metrics.collector import MetricsCollector
-        
+
         metrics = MetricsCollector()
         for i in range(10000):
             metrics.record("response_time", 0.1 + i * 0.0001)
-        
+
         def calculate_stats():
             return metrics.get_statistics()
-        
+
         stats = benchmark(calculate_stats)
-        assert "mean" in stats
-        assert "p95" in stats
-        assert "p99" in stats
+        custom_stats = stats["custom_metrics"]["response_time"]
+        assert "mean" in custom_stats
+        assert "p95" in custom_stats
+        assert "p99" in custom_stats
 
 
 class TestReportBenchmarks:
@@ -126,16 +127,16 @@ class TestReportBenchmarks:
     def test_console_report_generation(self, benchmark):
         """Benchmark console report generation."""
         from loadtest.metrics.collector import MetricsCollector
-        
+
         test = LoadTest(name="Report Test")
-        
+
         # Add sample metrics
         for i in range(1000):
             test.metrics.record("response_time", 0.1 + i * 0.001)
-        
+
         def generate_report():
             return test._generate_console_report()
-        
+
         report = benchmark(generate_report)
         assert "Load Test Report" in report
 
@@ -156,7 +157,7 @@ class TestScenarioBenchmarks:
                 )
                 for i in range(1000)
             ]
-        
+
         scenarios = benchmark(create_scenarios)
         assert len(scenarios) == 1000
 
@@ -164,9 +165,9 @@ class TestScenarioBenchmarks:
     async def test_scenario_with_dynamic_data(self, benchmark):
         """Benchmark scenario with dynamic data generation."""
         from phoney import Phoney
-        
+
         phoney = Phoney()
-        
+
         def create_scenarios():
             return [
                 HTTPScenario(
@@ -180,7 +181,7 @@ class TestScenarioBenchmarks:
                 )
                 for i in range(100)
             ]
-        
+
         scenarios = benchmark(create_scenarios)
         assert len(scenarios) == 100
 
@@ -191,12 +192,12 @@ class TestMemoryBenchmarks:
     def test_memory_with_many_scenarios(self):
         """Test memory efficiency with many scenarios."""
         import tracemalloc
-        
+
         tracemalloc.start()
-        
+
         # Take memory snapshot before
         snapshot1 = tracemalloc.take_snapshot()
-        
+
         # Create test with many scenarios
         test = LoadTest(name="Memory Test")
         for i in range(1000):
@@ -206,45 +207,45 @@ class TestMemoryBenchmarks:
                 url=f"https://api.example.com/{i}",
             )
             test.add_scenario(scenario, weight=1)
-        
+
         # Take memory snapshot after
         snapshot2 = tracemalloc.take_snapshot()
-        
+
         # Calculate memory usage
         stats = snapshot2.compare_to(snapshot1, 'lineno')
         total_memory = sum(stat.size_diff for stat in stats if stat.size_diff > 0)
-        
+
         # Should use less than 10MB for 1000 scenarios
         assert total_memory < 10 * 1024 * 1024
-        
+
         tracemalloc.stop()
 
     def test_memory_with_many_metrics(self):
         """Test memory efficiency with many metrics."""
         import tracemalloc
-        
+
         tracemalloc.start()
-        
+
         from loadtest.metrics.collector import MetricsCollector
-        
+
         # Take memory snapshot before
         snapshot1 = tracemalloc.take_snapshot()
-        
+
         # Record many metrics
         metrics = MetricsCollector()
         for i in range(100000):
             metrics.record("response_time", 0.1 + (i % 100) * 0.001)
-        
+
         # Take memory snapshot after
         snapshot2 = tracemalloc.take_snapshot()
-        
+
         # Calculate memory usage
         stats = snapshot2.compare_to(snapshot1, 'lineno')
         total_memory = sum(stat.size_diff for stat in stats if stat.size_diff > 0)
-        
+
         # Should use less than 50MB for 100k metrics
         assert total_memory < 50 * 1024 * 1024
-        
+
         tracemalloc.stop()
 
 
@@ -269,6 +270,6 @@ class TestConcurrentBenchmarks:
                 for i in range(100)
             ]
             return await asyncio.gather(*tasks)
-        
+
         scenarios = await benchmark(create_scenarios_concurrent)
         assert len(scenarios) == 100

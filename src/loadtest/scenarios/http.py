@@ -185,6 +185,7 @@ class HTTPScenario(Scenario):
         # Allow URL formatting with phoney data
         if "{" in self.url:
             import random
+
             return self.url.format(
                 random_id=random.randint(1, 10000),
                 username=self.phoney.username(),

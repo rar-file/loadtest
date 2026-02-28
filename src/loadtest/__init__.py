@@ -6,7 +6,7 @@ Quick Start:
     >>> test.run()
 
 Advanced Usage:
-    >>> test = loadtest("https://api.example.com", 
+    >>> test = loadtest("https://api.example.com",
     ...                 pattern="ramp", rps=100, duration=60)
     >>> test.add("GET /users")
     >>> test.add("POST /orders", weight=0.3)

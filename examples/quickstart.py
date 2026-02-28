@@ -17,20 +17,15 @@ from loadtest.generators.constant import ConstantRateGenerator
 from loadtest.scenarios.http import HTTPScenario
 
 
-async def main():
-    """Run a simple load test against httpbin.org."""
-    print("🚀 LoadTest Quick Start")
-    print("=" * 50)
-    
-    # Create a simple HTTP scenario
+async def create_test() -> LoadTest:
+    """Create a simple load test configuration (for CLI/Docker usage)."""
     scenario = HTTPScenario(
         name="Get Request",
         method="GET",
         url="https://httpbin.org/get",
     )
-    
-    # Build the test
-    test = (
+
+    return (
         LoadTest(
             name="Quick Start Test",
             duration=10,  # 10 seconds
@@ -40,25 +35,26 @@ async def main():
         .add_scenario(scenario, weight=1)
         .set_pattern(ConstantRateGenerator(rate=2))  # 2 requests/second
     )
-    
+
+
+async def main() -> int:
+    """Run a simple load test against httpbin.org (for standalone execution)."""
+    print("🚀 LoadTest Quick Start")
+    print("=" * 50)
+
+    test = await create_test()
+
     print(f"Test: {test.config.name}")
     print(f"Duration: {test.config.duration} seconds")
     print(f"Rate: 2 requests/second")
     print("=" * 50)
-    
+
     try:
-        # Run the test
         results = await test.run()
-        
-        # Print results
         print("\n" + test.report(format="console"))
-        
-        # Save HTML report
         test.report(format="html", output="quickstart_report.html")
         print("\n📊 HTML report saved to: quickstart_report.html")
-        
         return 0 if results.success_rate >= 95 else 1
-        
     except KeyboardInterrupt:
         print("\n\n⚠️ Test interrupted by user")
         test.stop()

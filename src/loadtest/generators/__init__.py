@@ -26,7 +26,8 @@ from __future__ import annotations
 # Legacy generators (maintained for backward compatibility)
 from loadtest.generators.constant import ConstantRateGenerator, VariableRateGenerator
 from loadtest.generators.ramp import RampGenerator
-from loadtest.generators.spike import SpikeGenerator, BurstGenerator as LegacyBurstGenerator
+from loadtest.generators.spike import BurstGenerator as LegacyBurstGenerator
+from loadtest.generators.spike import SpikeGenerator
 
 # New enhanced patterns
 from loadtest.patterns import (

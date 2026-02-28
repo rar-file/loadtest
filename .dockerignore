@@ -24,12 +24,15 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+MANIFEST
 
 # Virtual environments
 venv/
 ENV/
 env/
 .venv/
+env.bak/
+venv.bak/
 
 # IDE
 .vscode/
@@ -37,6 +40,8 @@ env/
 *.swp
 *.swo
 *~
+.project
+.pydevproject
 
 # Testing
 .pytest_cache/
@@ -44,16 +49,28 @@ env/
 .coverage.*
 htmlcov/
 .tox/
+.nox/
+osb_test/
+osb_test_*/
+.benchmarks/
 
 # Documentation
 docs/_build/
 site/
+*.md
+!README.md
+!LICENSE
 
 # OS
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
 
-# Reports
+# Reports (generated)
 *.html
 !src/loadtest/reports/templates/*.html
 reports/
@@ -62,6 +79,12 @@ reports/
 .github/
 .pre-commit-config.yaml
 
-# Examples (keep for reference, but tests not needed)
+# Examples and tests (keep structure but not test files)
 tests/
 benchmarks/
+
+# Misc
+*.log
+*.tmp
+*.bak
+*.orig

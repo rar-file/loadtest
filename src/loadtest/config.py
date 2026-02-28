@@ -11,6 +11,7 @@ from typing import Any
 
 try:
     import yaml
+
     HAS_YAML = True
 except ImportError:
     HAS_YAML = False
@@ -65,7 +66,7 @@ def from_dict(config: dict[str, Any]) -> SimpleLoadTest:
         pattern=config.get("pattern", "constant"),
         rps=config.get("rps", 10),
         duration=config.get("duration", 60),
-        **config.get("pattern_options", {})
+        **config.get("pattern_options", {}),
     )
 
     # Set global headers
@@ -219,7 +220,7 @@ def generate_config_file(
     rps: float = 10,
     duration: float = 60,
     endpoints: list[dict[str, Any]] | None = None,
-    output: str = "loadtest.json"
+    output: str = "loadtest.json",
 ) -> Path:
     """Generate a new configuration file.
 
@@ -255,7 +256,9 @@ def generate_config_file(
 
     if path.suffix in (".yaml", ".yml"):
         if not HAS_YAML:
-            raise ImportError("PyYAML is required for YAML support. Install with: pip install pyyaml")
+            raise ImportError(
+                "PyYAML is required for YAML support. Install with: pip install pyyaml"
+            )
         with open(path, "w") as f:
             yaml.dump(config, f, default_flow_style=False, sort_keys=False)
     else:
